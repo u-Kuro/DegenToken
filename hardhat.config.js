@@ -1,23 +1,31 @@
-require("@nomicfoundation/hardhat-toolbox");
+require("@nomiclabs/hardhat-etherscan");
+require("@nomiclabs/hardhat-ethers");
 require('dotenv').config();
 
-const FORK_FUJI = false;
-const FORK_MAINNET = false;
-let forkingData = undefined;
-
-if (FORK_MAINNET) {
-  forkingData = {
-    url: "https://api.avax.network/ext/bc/C/rpcc",
-  };
-}
-if (FORK_FUJI) {
-  forkingData = {
+const FORK_FUJI = false
+const FORK_MAINNET = false
+const forkingData = FORK_FUJI
+  ? {
     url: "https://api.avax-test.network/ext/bc/C/rpc",
-  };
-}
+  }
+  : FORK_MAINNET
+    ? {
+      url: "https://api.avax.network/ext/bc/C/rpc",
+    }
+    : undefined
+let accounts = forkingData ? [
+  process.env.WALLET_PRIVATE_KEY,
+  process.env.WALLET_PRIVATE_KEY_2,
+  process.env.WALLET_PRIVATE_KEY_3
+]
+  :
+  [process.env.WALLET_PRIVATE_KEY]
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
+  etherscan: {
+    apiKey: process.env.SNOWTRACE_API_KEY, // we use an .env file to hide our Snowtrace API KEY
+  },
   solidity: "0.8.18",
   networks: {
     hardhat: {
@@ -27,18 +35,15 @@ module.exports = {
     },
     fuji: {
       url: "https://api.avax-test.network/ext/bc/C/rpc",
-      gasPrice: 225000000000,
+      gasPrice: 25000000000,
       chainId: 43113,
-      accounts: [process.env.WALLET_PRIVATE_KEY], // we use a .env file to hide our wallets private key
+      accounts: accounts, // we use a .env file to hide our wallets private key
     },
     mainnet: {
       url: "https://api.avax.network/ext/bc/C/rpc",
-      gasPrice: 225000000000,
+      gasPrice: 25000000000,
       chainId: 43114,
-      accounts: [process.env.WALLET_PRIVATE_KEY],
+      accounts: accounts,
     },
-  },
-  etherscan: {
-    apiKey: process.env.SNOWTRACE_API_KEY, // we use an .env file to hide our Snowtrace API KEY
   },
 };
