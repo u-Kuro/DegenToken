@@ -25,7 +25,7 @@ The Solidity contract represents the implementation of the DegenToken ERC-20 tok
 
 - Minting tokens: The contract owner can mint tokens and assign them to specific addresses.
 - Transferring tokens: Tokens can be transferred between accounts.
-- Redeeming tokens: Any address can redeem their owned tokens.
+- Redeeming tokens: Any address can redeem their own NFT prize using their tokens.
 - Burning tokens: Any address can burn the tokens they own.
 - Checking token balance: Addresses can check their token balance.
 
