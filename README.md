@@ -16,8 +16,8 @@ The project aims to test and deploy the smart contract to the Avalanche Fuji Tes
 
 The Degen token smart contract has been verified on SnowTrace. The contract address and token address on SnowTrace are as follows:
 
-- Contract address: [0xc20891eD846463D918C57C19D2D1413A5b467a7d](https://testnet.snowtrace.io/address/0xc20891ed846463d918c57c19d2d1413a5b467a7d)
-- Token in contract address: [0xc20891eD846463D918C57C19D2D1413A5b467a7d](https://testnet.snowtrace.io/token/0xc20891ed846463d918c57c19d2d1413a5b467a7d)
+- Contract address: [0x372e3553Cdfc00b74dff723fe10D9EDed402Afa1](https://testnet.snowtrace.io/address/0x372e3553cdfc00b74dff723fe10d9eded402afa1)
+- Token in contract address: [0x372e3553Cdfc00b74dff723fe10D9EDed402Afa1](https://testnet.snowtrace.io/token/0x372e3553cdfc00b74dff723fe10d9eded402afa1)
 
 ## Solidity Contract
 

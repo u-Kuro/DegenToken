@@ -1,7 +1,14 @@
 const { expect } = require("chai");
 const { network } = require("hardhat");
 require('dotenv').config();
+const readline = require('readline');
+const { promisify } = require("util");
 
+
+const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
 let thash;
 
 describe("DegenToken", function () {
@@ -25,7 +32,8 @@ describe("DegenToken", function () {
                 break;
             }
             case "fuji": {
-                const contractAddress = "0xc20891eD846463D918C57C19D2D1413A5b467a7d";
+                const contractAddress = "0x372e3553Cdfc00b74dff723fe10D9EDed402Afa1";
+                // Past Transaction: 0xc20891eD846463D918C57C19D2D1413A5b467a7d
                 degentoken = await DegenToken.attach(contractAddress);
 
                 [owner, addr1, addr2] = await ethers.getSigners();
@@ -50,6 +58,7 @@ describe("DegenToken", function () {
         thash = await degentoken.connect(owner, { gasLimit: 15000000 }).mintTokens(owner.address, tokensMinted, { gasLimit: 15000000 });
         await owner.provider.waitForTransaction(thash.hash);
         const ownerBalance = await degentoken.connect(owner, { gasLimit: 15000000 }).checkBalance({ gasLimit: 15000000 });
+
         expect(ownerBalance.toNumber()).to.equal(ownerBalanceBefore.add(tokensMinted).toNumber());
         // Mint from addr1 to addr1 address
         try {
@@ -89,19 +98,37 @@ describe("DegenToken", function () {
 
     it("should allow anyone to redeem tokens", async function () {
         this.timeout(0);
-
         const priceAmount = ethers.utils.parseUnits("1", "gwei");
         thash = await degentoken.connect(owner, { gasLimit: 15000000 }).mintTokens(addr1.address, priceAmount, { gasLimit: 15000000 });
         await owner.provider.waitForTransaction(thash.hash);
-
         const addr1BalanceBefore = await degentoken.connect(addr1, { gasLimit: 15000000 }).checkBalance({ gasLimit: 15000000 })
 
-        thash = await degentoken.connect(addr1, { gasLimit: 15000000 }).redeemTokens(priceAmount, { gasLimit: 15000000 });
+        // Show NFT Prizes Available
+        const redeemPrizes = await degentoken.showRedeemPrizes()
+        console.log("\n      Redeem NFT Prizes\n")
+        redeemPrizes.forEach((prize) => {
+            console.log(`        [${prize.id}] ${prize.name}: ${prize.amount}`);
+        })
+
+        // User Chooses an NFT
+        const question = promisify(rl.question).bind(rl);
+        const userInput = await question('\n      Please Choose a Prize Number: ');
+        rl.close();
+
+        // User Redeems NFT Prize and Subtracted to his Tokens
+        thash = await degentoken.connect(addr1, { gasLimit: 15000000 }).redeemTokens(userInput, { gasLimit: 15000000 });
+        let receipt = await thash.wait()
         await addr1.provider.waitForTransaction(thash.hash);
+
+        // Get the event logs emitted in the transaction receipt
+        let event = receipt.events.find((event) => event.event === 'NFTRedeemed');
+        let nftRedeemed = event.args.nft;
+        console.log(`\n      Congratulations, you've received the NFT named "${nftRedeemed.name}"\n`);
         const addr1BalanceAfter = await degentoken.connect(addr1, { gasLimit: 15000000 }).checkBalance({ gasLimit: 15000000 })
 
-        const expectedAddr1Balance = addr1BalanceBefore.sub(priceAmount);
-        expect(addr1BalanceAfter.toNumber()).to.equal(expectedAddr1Balance.toNumber());
+        // Chech if it is Subtracted to User Wallet
+        const expectedAddr1Balance = addr1BalanceBefore.sub(nftRedeemed.amount);
+        expect(addr1BalanceAfter.toNumber()).to.equal(expectedAddr1Balance.toNumber())
     });
 
     it("should allow anyone to burn tokens they own", async function () {
